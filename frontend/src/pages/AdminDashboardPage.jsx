@@ -23,6 +23,38 @@ export default function AdminDashboardPage() {
     ]
   };
 
+  // LURUSKAN TAJUK VOUCHERS
+ const chartOptions = {
+    maintainAspectRatio: false,
+    aspectRatio: 0.6,
+    scales: {
+      x: {
+        ticks: {
+          maxRotation: 0, // Kekalkan tulisan lurus
+          minRotation: 0,
+          callback: function(value) {
+            const label = this.getLabelForValue(value);
+            
+            if (label) {
+              const words = label.split(' ');
+              const lines = [];
+              
+              // Jalan setiap 2 perkataan untuk digabungkan ke baris baharu
+              for (let i = 0; i < words.length; i += 2) {
+                // Ambil perkataan semasa dan perkataan seterusnya (jika ada)
+                const pair = words.slice(i, i + 2).join(' ');
+                lines.push(pair);
+              }
+              
+              return lines; // Pulangkan array baris (Maksimum 2 perkataan per baris)
+            }
+            return label;
+          }
+        }
+      }
+    }
+  };
+
   return (
     <>
       <PageHeader title="Admin Dashboard" eyebrow="Analytics">
@@ -31,7 +63,7 @@ export default function AdminDashboardPage() {
       <div className="admin-grid">
         <section className="summary-panel">
           <h2>Top redemptions</h2>
-          <Chart type="bar" data={chartData} />
+          <Chart type="bar" data={chartData} options={chartOptions} style={{ position: 'relative', height: '300px' }} />
         </section>
         <section className="summary-panel">
           <h2>Low redemption vouchers</h2>
