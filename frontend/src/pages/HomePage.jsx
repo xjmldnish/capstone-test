@@ -3,6 +3,7 @@ import { Button } from 'primereact/button';
 import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
+import { Paginator } from 'primereact/paginator';
 import PageHeader from '../components/PageHeader.jsx';
 import VoucherCard from '../components/VoucherCard.jsx';
 import { categoryApi, voucherApi } from '../api/resources';
@@ -18,12 +19,15 @@ export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState({ page: 1, limit: 8, total: 0, totalPages: 0 });
 
   async function loadData() {
     setLoading(true);
     try {
       const params = {};
       params.publicOnly = true;
+      params.page = pagination.page;
+      params.limit = pagination.limit;
       if (selectedCategory) params.category = selectedCategory;
       if (search) params.search = search;
       const [categoryData, voucherData] = await Promise.all([
@@ -32,7 +36,8 @@ export default function HomePage() {
         loadCart()
       ]);
       setCategories(categoryData);
-      setVouchers(voucherData);
+      setVouchers(voucherData.vouchers);
+      setPagination(voucherData.pagination);
     } finally {
       setLoading(false);
     }
@@ -40,7 +45,7 @@ export default function HomePage() {
 
   useEffect(() => {
     loadData();
-  }, [selectedCategory]);
+  }, [selectedCategory, pagination.page]);
 
   async function handleAdd(voucher) {
     await addToCart(voucher._id, 1);
@@ -49,6 +54,7 @@ export default function HomePage() {
 
   function handleSearch(event) {
     event.preventDefault();
+    setPagination((prev) => ({ ...prev, page: 1 }));
     loadData();
   }
 
@@ -66,7 +72,7 @@ export default function HomePage() {
         </div>
         <div>
           <span>Live vouchers</span>
-          <strong>{vouchers.length}</strong>
+          <strong>{pagination.total}</strong>
         </div>
         <div>
           <span>Categories</span>
@@ -81,7 +87,10 @@ export default function HomePage() {
         </span>
         <Dropdown
           value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.value)}
+          onChange={(e) => {
+            setSelectedCategory(e.value);
+            setPagination((prev) => ({ ...prev, page: 1 }));
+          }}
           options={[{ name: 'All categories', _id: null }, ...categories]}
           optionLabel="name"
           optionValue="_id"
@@ -91,12 +100,23 @@ export default function HomePage() {
       </form>
 
       <div className="category-pills">
-        <button className={!selectedCategory ? 'active' : ''} onClick={() => setSelectedCategory(null)}>All</button>
+        <button
+          className={!selectedCategory ? 'active' : ''}
+          onClick={() => {
+            setSelectedCategory(null);
+            setPagination((prev) => ({ ...prev, page: 1 }));
+          }}
+        >
+          All
+        </button>
         {categories.map((category) => (
           <button
             key={category._id}
             className={selectedCategory === category._id ? 'active' : ''}
-            onClick={() => setSelectedCategory(category._id)}
+            onClick={() => {
+              setSelectedCategory(category._id);
+              setPagination((prev) => ({ ...prev, page: 1 }));
+            }}
           >
             {category.name}
           </button>
@@ -111,6 +131,15 @@ export default function HomePage() {
 
       {!loading && vouchers.length === 0 && (
         <div className="empty-state">No vouchers found. Try another category or search.</div>
+      )}
+
+      {pagination.totalPages > 1 && (
+        <Paginator
+          first={(pagination.page - 1) * pagination.limit}
+          rows={pagination.limit}
+          totalRecords={pagination.total}
+          onPageChange={(e) => setPagination((prev) => ({ ...prev, page: e.page + 1 }))}
+        />
       )}
     </>
   );

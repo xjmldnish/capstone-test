@@ -15,8 +15,24 @@ async function listVouchers(req, res, next) {
     if (req.query.category) filter.category_id = req.query.category;
     if (req.query.search) filter.title = { $regex: req.query.search, $options: 'i' };
 
-    const vouchers = await Voucher.find(filter).populate('category_id').sort('-createdAt');
-    res.json(vouchers);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 12;
+    const skip = (page - 1) * limit;
+
+    const [vouchers, total] = await Promise.all([
+      Voucher.find(filter).populate('category_id').sort('-createdAt').skip(skip).limit(limit),
+      Voucher.countDocuments(filter)
+    ]);
+
+    res.json({
+      vouchers,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit)
+      }
+    });
   } catch (err) {
     next(err);
   }
