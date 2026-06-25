@@ -408,8 +408,7 @@ a {
 }
 
 .cart-layout,
-.profile-grid,
-.admin-grid {
+.profile-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 320px;
   gap: 1rem;
@@ -478,17 +477,28 @@ a {
   color: var(--primary);
 }
 
-.history-item {
-  grid-template-columns: minmax(0, 1fr) auto auto auto;
-}
-
 .analytics-row {
   grid-template-columns: minmax(0, 1fr) auto auto;
 }
 
 .admin-grid {
+  display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(280px, 0.7fr);
+  gap: 1rem;
+  align-items: start;
   margin-bottom: 1rem;
+}
+
+.admin-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.stat-card {
+  text-align: center;
+  padding: 1.5rem !important;
 }
 
 .management-grid {
@@ -634,6 +644,7 @@ a {
   .profile-grid,
   .admin-grid,
   .management-grid,
+  .admin-stats-grid,
   .home-stats,
   .toolbar {
     grid-template-columns: 1fr;

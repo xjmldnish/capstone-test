@@ -6,7 +6,7 @@ import PageHeader from '../components/PageHeader.jsx';
 import { analyticsApi } from '../api/resources';
 
 export default function AdminDashboardPage() {
-  const [data, setData] = useState({ top: [], low: [], trends: [] });
+  const [data, setData] = useState({ top: [], low: [], trends: [], stats: { totalUsers: 0, totalRedemptions: 0, topUsers: [] } });
 
   useEffect(() => {
     analyticsApi.summary().then(setData);
@@ -58,8 +58,20 @@ export default function AdminDashboardPage() {
   return (
     <>
       <PageHeader title="Admin Dashboard" eyebrow="Analytics">
-        Track top and low redemption vouchers for the rubric analytics requirement.
+        Track analytics, user metrics, and top redemptions.
       </PageHeader>
+
+      <div className="admin-stats-grid">
+        <div className="summary-panel stat-card">
+          <span className="muted">Total Users </span>
+          <strong style={{ fontSize: '2rem', color: 'var(--primary)' }}>{data.stats.totalUsers}</strong>
+        </div>
+        <div className="summary-panel stat-card">
+          <span className="muted">Total Redemptions </span>
+          <strong style={{ fontSize: '2rem', color: 'var(--primary)' }}>{data.stats.totalRedemptions}</strong>
+        </div>
+      </div>
+
       <div className="admin-grid">
         <section className="summary-panel">
           <h2>Top redemptions</h2>
@@ -75,9 +87,30 @@ export default function AdminDashboardPage() {
           ))}
         </section>
       </div>
-      <Link to="/admin/vouchers">
-        <Button label="Manage vouchers" icon="pi pi-ticket" />
-      </Link>
+
+      <div className="admin-grid">
+        <section className="summary-panel">
+          <h2>Top users by redemptions</h2>
+          {data.stats.topUsers.map((user) => (
+            <div className="analytics-row" key={user._id}>
+              <span>{user.username} ({user.email})</span>
+              <strong>{user.totalRedemptions} redeemed</strong>
+            </div>
+          ))}
+          {!data.stats.topUsers.length && <div className="empty-state">No redemptions yet.</div>}
+        </section>
+        <section className="summary-panel">
+          <h2>Quick actions</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <Link to="/admin/vouchers">
+              <Button label="Manage vouchers" icon="pi pi-ticket" style={{ width: '100%' }} />
+            </Link>
+            <Link to="/admin/users">
+              <Button label="Manage users" icon="pi pi-users" style={{ width: '100%' }} />
+            </Link>
+          </div>
+        </section>
+      </div>
     </>
   );
 }

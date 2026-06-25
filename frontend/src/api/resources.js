@@ -5,7 +5,9 @@ export const authApi = {
   signup: (payload) => api.post('/auth/signup', payload).then((r) => r.data),
   login: (payload) => api.post('/auth/login', payload).then((r) => r.data),
   me: () => api.get('/auth/me').then((r) => r.data),
-  updateProfile: (payload) => api.put('/auth/me', payload).then((r) => r.data)
+  updateProfile: (payload) => api.put('/auth/me', payload).then((r) => r.data),
+  listUsers: () => api.get('/auth/users').then((r) => r.data),
+  updateUserPoints: (id, points) => api.put(`/auth/users/${id}/points`, { points }).then((r) => r.data)
 };
 
 export const categoryApi = {
