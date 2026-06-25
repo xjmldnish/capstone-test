@@ -1,5 +1,6 @@
 const CartItemHistory = require('../models/CartItemHistory');
 const Voucher = require('../models/Voucher');
+const User = require('../models/User');
 
 async function summary(req, res, next) {
   try {
@@ -32,7 +33,32 @@ async function summary(req, res, next) {
       { $sort: { _id: 1 } }
     ]);
 
-    res.json({ top, low, trends });
+    // User stats
+    const totalUsers = await User.countDocuments({ role: 'user' });
+    const totalRedemptions = await CartItemHistory.aggregate([
+      { $group: { _id: null, total: { $sum: '$quantity' } } }
+    ]);
+
+    // Top users by redemption count
+    const topUsers = await CartItemHistory.aggregate([
+      { $group: { _id: '$user', totalRedemptions: { $sum: '$quantity' } } },
+      { $sort: { totalRedemptions: -1 } },
+      { $limit: 5 },
+      { $lookup: { from: 'users', localField: '_id', foreignField: '_id', as: 'userInfo' } },
+      { $unwind: '$userInfo' },
+      { $project: { username: '$userInfo.username', email: '$userInfo.email', totalRedemptions: 1 } }
+    ]);
+
+    res.json({
+      top,
+      low,
+      trends,
+      stats: {
+        totalUsers,
+        totalRedemptions: totalRedemptions[0]?.total || 0,
+        topUsers
+      }
+    });
   } catch (err) {
     next(err);
   }
