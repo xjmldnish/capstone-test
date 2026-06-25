@@ -35,10 +35,10 @@ export default function AdminVouchersPage() {
 
   async function load() {
     const [voucherData, categoryData] = await Promise.all([
-      voucherApi.list(),
+      voucherApi.list({ limit: 1000 }),
       categoryApi.list()
     ]);
-    setVouchers(voucherData);
+    setVouchers(voucherData.vouchers || voucherData);
     setCategories(categoryData);
   }
 

@@ -1,5 +1,6 @@
 const CartItemHistory = require('../models/CartItemHistory');
 const Voucher = require('../models/Voucher');
+const User = require('../models/User');
 
 async function summary(req, res, next) {
   try {
@@ -32,7 +33,56 @@ async function summary(req, res, next) {
       { $sort: { _id: 1 } }
     ]);
 
-    res.json({ top, low, trends });
+    // User stats
+    const totalUsers = await User.countDocuments({ role: 'user' });
+    const totalRedemptions = await CartItemHistory.aggregate([
+      { $group: { _id: null, total: { $sum: '$quantity' } } }
+    ]);
+
+    // Top users by redemption count
+    const topUsers = await CartItemHistory.aggregate([
+      { $group: { _id: '$user', totalRedemptions: { $sum: '$quantity' } } },
+      { $sort: { totalRedemptions: -1 } },
+      { $limit: 5 },
+      { $lookup: { from: 'users', localField: '_id', foreignField: '_id', as: 'userInfo' } },
+      { $unwind: '$userInfo' },
+      { $project: { username: '$userInfo.username', email: '$userInfo.email', totalRedemptions: 1 } }
+    ]);
+
+    // User registration trends
+    const userTrends = await User.aggregate([
+      { $match: { role: 'user' } },
+      {
+        $group: {
+          _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+          newUsers: { $sum: 1 }
+        }
+      },
+      { $sort: { _id: 1 } }
+    ]);
+
+    // Category breakdown
+    const categoryBreakdown = await CartItemHistory.aggregate([
+      { $lookup: { from: 'vouchers', localField: 'voucher', foreignField: '_id', as: 'voucherInfo' } },
+      { $unwind: '$voucherInfo' },
+      { $lookup: { from: 'categories', localField: 'voucherInfo.category_id', foreignField: '_id', as: 'categoryInfo' } },
+      { $unwind: '$categoryInfo' },
+      { $group: { _id: '$categoryInfo.name', totalRedemptions: { $sum: '$quantity' } } },
+      { $sort: { totalRedemptions: -1 } }
+    ]);
+
+    res.json({
+      top,
+      low,
+      trends,
+      stats: {
+        totalUsers,
+        totalRedemptions: totalRedemptions[0]?.total || 0,
+        topUsers,
+        userTrends,
+        categoryBreakdown
+      }
+    });
   } catch (err) {
     next(err);
   }

@@ -12,6 +12,7 @@ import AdminDashboardPage from './pages/AdminDashboardPage.jsx';
 import AdminVouchersPage from './pages/AdminVouchersPage.jsx';
 import TermsPage from './pages/TermsPage.jsx';
 import RedemptionHistoryPage from './pages/RedemptionHistoryPage.jsx';
+import AdminUsersPage from './pages/AdminUsersPage.jsx';
 
 export default function App() {
   return (
@@ -29,6 +30,7 @@ export default function App() {
           <Route element={<AdminRoute />}>
             <Route path="/admin" element={<AdminDashboardPage />} />
             <Route path="/admin/vouchers" element={<AdminVouchersPage />} />
+            <Route path="/admin/users" element={<AdminUsersPage />} />
           </Route>
         </Route>
       </Route>

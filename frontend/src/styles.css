@@ -409,8 +409,7 @@ a {
 }
 
 .cart-layout,
-.profile-grid,
-.admin-grid {
+.profile-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 320px;
   gap: 1rem;
@@ -424,7 +423,6 @@ a {
 }
 
 .cart-item,
-.history-item,
 .analytics-row {
   display: grid;
   grid-template-columns: 80px minmax(0, 1fr) auto auto auto;
@@ -434,6 +432,37 @@ a {
   background: white;
   border: 1px solid var(--border);
   border-radius: 8px;
+}
+
+.history-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.history-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.5rem;
+}
+
+.history-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.history-details > span,
+.history-details > a {
+  display: flex;
+  align-items: center;
 }
 
 .cart-item img {
@@ -449,17 +478,32 @@ a {
   color: var(--primary);
 }
 
-.history-item {
-  grid-template-columns: minmax(0, 1fr) auto auto auto;
-}
-
 .analytics-row {
   grid-template-columns: minmax(0, 1fr) auto auto;
 }
 
 .admin-grid {
+  display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(280px, 0.7fr);
+  gap: 1rem;
+  align-items: start;
   margin-bottom: 1rem;
+}
+
+.admin-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.stat-card {
+  text-align: center;
+  padding: 1.5rem !important;
+}
+
+.chart-panel {
+  height: 280px;
 }
 
 .management-grid {
@@ -556,14 +600,7 @@ a {
   /* 4. SEKAT teks nama atau mata daripada memanjang tanpa kawalan */
   .topbar-actions .user-chip {
     gap: 0.25rem;
-    font-size: 0.85rem; /* Kecilkan teks nama "aisha" */
-  }
-
-  /* Menyembunyikan nama pada skrin yang tersangat kecil (< 380px) jika masih padat */
-  @media (max-width: 380px) {
-    .topbar-actions .user-chip span:not(.points) {
-      display: none; /* Sembunyikan teks nama "aisha", kekalkan ikon/mata sahaja */
-    }
+    font-size: 0.85rem;
   }
 
   .points {
@@ -605,6 +642,7 @@ a {
   .profile-grid,
   .admin-grid,
   .management-grid,
+  .admin-stats-grid,
   .home-stats,
   .toolbar {
     grid-template-columns: 1fr;
@@ -673,9 +711,108 @@ a {
     width: 100% !important;
   }
 
-  .history-item {
-    grid-template-columns: 1fr;
-    gap: 0.5rem;
-    justify-items: start;
+  /* Admin dashboard charts */
+  .admin-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stat-card strong {
+    font-size: 1.5rem !important;
+  }
+
+  .chart-panel {
+    height: 220px !important;
   }
 }
+
+/* Extra small screens (iPhone SE, iPhone 12 mini, small devices < 400px) */
+@media (max-width: 400px) {
+  /* Hide username text in topbar, keep points badge */
+  .topbar-actions .user-chip span:not(.points) {
+    display: none;
+  }
+  .page-shell {
+    width: calc(100% - 1rem);
+    padding: 1.5rem 0 3rem;
+  }
+
+  .page-header h1,
+  .login-hero h1,
+  .details-panel h1 {
+    font-size: 1.75rem;
+  }
+
+  .eyebrow {
+    font-size: 0.7rem;
+  }
+
+  /* Make stat cards stack on very small screens */
+  .admin-stats-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem;
+  }
+
+  .home-stats {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem;
+  }
+
+  .stat-card {
+    padding: 1rem !important;
+  }
+
+  .stat-card strong {
+    font-size: 1.75rem !important;
+  }
+
+  .stat-card span {
+    font-size: 0.85rem;
+  }
+
+  /* Smaller chart heights for tiny screens */
+  .chart-panel {
+    height: 200px !important;
+  }
+
+  /* Reduce padding in panels */
+  .summary-panel {
+    padding: 1rem !important;
+  }
+
+  .summary-panel h2 {
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  /* Tighter spacing in grids */
+  .admin-grid {
+    gap: 0.75rem !important;
+  }
+
+  /* Smaller toolbar elements */
+  .toolbar {
+    gap: 0.5rem;
+  }
+
+  /* Make category pills wrap better */
+  .category-pills {
+    gap: 0.4rem;
+  }
+
+  .category-pills button {
+    padding: 0.4rem 0.7rem;
+    font-size: 0.85rem;
+  }
+
+  /* Adjust voucher grid for small screens */
+  .voucher-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  /* Make buttons full width on tiny screens */
+  .p-button {
+    font-size: 0.9rem;
+  }
+}
+

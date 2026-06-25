@@ -125,7 +125,6 @@ export default function AppLayout() {
         
         <nav className="nav-links">
           <NavLink to="/">Vouchers</NavLink>
-          <NavLink to="/profile">Profile</NavLink>
           <NavLink to="/terms">Terms</NavLink>
           {isAdmin && <NavLink to="/admin">Admin</NavLink>}
         </nav>
@@ -148,9 +147,20 @@ export default function AppLayout() {
 
           {/* Cip Maklumat Pengguna */}
           <div className="user-chip">
-            <span>{user?.username}</span>
             <span className="points">{user?.points} pts</span>
-            <Button icon="pi pi-sign-out" rounded text aria-label="Log out" onClick={handleLogout} />
+            <Menu model={menuItems} popup ref={userMenuRef} id="user_menu" />
+            <Button
+              label={user?.username}
+              icon="pi pi-chevron-down"
+              iconPos="right"
+              onClick={(e) => userMenuRef.current.toggle(e)}
+              aria-controls="user_menu"
+              aria-haspopup
+              text
+              severity="secondary"
+              className="p-button-sm"
+              style={{ fontWeight: 'bold' }}
+            />
           </div>
         </div>
       </header>
