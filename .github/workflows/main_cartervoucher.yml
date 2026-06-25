@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_WEBAPP_NAME: cartervoucher   # Replace with your actual Azure App Service name
+  AZURE_WEBAPP_NAME: carterVoucher   # Must exactly match your Azure App Service name (check portal URL)
   NODE_VERSION: '24.x'
 
 permissions:
