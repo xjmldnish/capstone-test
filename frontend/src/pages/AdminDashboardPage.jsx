@@ -84,7 +84,7 @@ export default function AdminDashboardPage() {
     datasets: [{
       label: 'New Users',
       data: data.stats.userTrends.map((t) => t.newUsers),
-      backgroundColor: '#16a34a'
+      backgroundColor: '#2563eb'
     }]
   };
 
@@ -114,7 +114,7 @@ export default function AdminDashboardPage() {
     datasets: [{
       label: 'Redemptions',
       data: data.stats.topUsers.map((u) => u.totalRedemptions),
-      backgroundColor: '#7c3aed'
+      backgroundColor: '#2563eb'
     }]
   };
 

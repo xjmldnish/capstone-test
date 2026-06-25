@@ -599,14 +599,7 @@ a {
   /* 4. SEKAT teks nama atau mata daripada memanjang tanpa kawalan */
   .topbar-actions .user-chip {
     gap: 0.25rem;
-    font-size: 0.85rem; /* Kecilkan teks nama "aisha" */
-  }
-
-  /* Menyembunyikan nama pada skrin yang tersangat kecil (< 380px) jika masih padat */
-  @media (max-width: 380px) {
-    .topbar-actions .user-chip span:not(.points) {
-      display: none; /* Sembunyikan teks nama "aisha", kekalkan ikon/mata sahaja */
-    }
+    font-size: 0.85rem;
   }
 
   .points {
@@ -728,5 +721,96 @@ a {
 
   .chart-panel {
     height: 220px !important;
+  }
+}
+
+/* Extra small screens (iPhone SE, iPhone 12 mini, small devices < 400px) */
+@media (max-width: 400px) {
+  /* Hide username text in topbar, keep points badge */
+  .topbar-actions .user-chip span:not(.points) {
+    display: none;
+  }
+  .page-shell {
+    width: calc(100% - 1rem);
+    padding: 1.5rem 0 3rem;
+  }
+
+  .page-header h1,
+  .login-hero h1,
+  .details-panel h1 {
+    font-size: 1.75rem;
+  }
+
+  .eyebrow {
+    font-size: 0.7rem;
+  }
+
+  /* Make stat cards stack on very small screens */
+  .admin-stats-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem;
+  }
+
+  .home-stats {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem;
+  }
+
+  .stat-card {
+    padding: 1rem !important;
+  }
+
+  .stat-card strong {
+    font-size: 1.75rem !important;
+  }
+
+  .stat-card span {
+    font-size: 0.85rem;
+  }
+
+  /* Smaller chart heights for tiny screens */
+  .chart-panel {
+    height: 200px !important;
+  }
+
+  /* Reduce padding in panels */
+  .summary-panel {
+    padding: 1rem !important;
+  }
+
+  .summary-panel h2 {
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  /* Tighter spacing in grids */
+  .admin-grid {
+    gap: 0.75rem !important;
+  }
+
+  /* Smaller toolbar elements */
+  .toolbar {
+    gap: 0.5rem;
+  }
+
+  /* Make category pills wrap better */
+  .category-pills {
+    gap: 0.4rem;
+  }
+
+  .category-pills button {
+    padding: 0.4rem 0.7rem;
+    font-size: 0.85rem;
+  }
+
+  /* Adjust voucher grid for small screens */
+  .voucher-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  /* Make buttons full width on tiny screens */
+  .p-button {
+    font-size: 0.9rem;
   }
 }
