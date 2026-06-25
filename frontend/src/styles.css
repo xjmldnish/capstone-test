@@ -501,6 +501,10 @@ a {
   padding: 1.5rem !important;
 }
 
+.chart-panel {
+  height: 280px;
+}
+
 .management-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 320px;
@@ -711,5 +715,18 @@ a {
 
   .section-title-row button {
     width: 100% !important;
+  }
+
+  /* Admin dashboard charts */
+  .admin-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stat-card strong {
+    font-size: 1.5rem !important;
+  }
+
+  .chart-panel {
+    height: 220px !important;
   }
 }

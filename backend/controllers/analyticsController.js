@@ -49,6 +49,28 @@ async function summary(req, res, next) {
       { $project: { username: '$userInfo.username', email: '$userInfo.email', totalRedemptions: 1 } }
     ]);
 
+    // User registration trends
+    const userTrends = await User.aggregate([
+      { $match: { role: 'user' } },
+      {
+        $group: {
+          _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+          newUsers: { $sum: 1 }
+        }
+      },
+      { $sort: { _id: 1 } }
+    ]);
+
+    // Category breakdown
+    const categoryBreakdown = await CartItemHistory.aggregate([
+      { $lookup: { from: 'vouchers', localField: 'voucher', foreignField: '_id', as: 'voucherInfo' } },
+      { $unwind: '$voucherInfo' },
+      { $lookup: { from: 'categories', localField: 'voucherInfo.category_id', foreignField: '_id', as: 'categoryInfo' } },
+      { $unwind: '$categoryInfo' },
+      { $group: { _id: '$categoryInfo.name', totalRedemptions: { $sum: '$quantity' } } },
+      { $sort: { totalRedemptions: -1 } }
+    ]);
+
     res.json({
       top,
       low,
@@ -56,7 +78,9 @@ async function summary(req, res, next) {
       stats: {
         totalUsers,
         totalRedemptions: totalRedemptions[0]?.total || 0,
-        topUsers
+        topUsers,
+        userTrends,
+        categoryBreakdown
       }
     });
   } catch (err) {
