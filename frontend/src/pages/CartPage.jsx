@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Button } from 'primereact/button';
+import { Checkbox } from 'primereact/checkbox';
+import { Dialog } from 'primereact/dialog';
 import { InputNumber } from 'primereact/inputnumber';
 import { Message } from 'primereact/message';
 import { Toast } from 'primereact/toast';
@@ -14,6 +16,8 @@ export default function CartPage() {
   const { user, refreshUser } = useAuth();
   const { cart, loadCart, updateQuantity, removeItem, loading } = useCart();
   const [result, setResult] = useState(null);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [termsVisible, setTermsVisible] = useState(false);
 
   useEffect(() => {
     loadCart();
@@ -68,7 +72,32 @@ export default function CartPage() {
           <h2>Total</h2>
           <p className="total-points">{cart.totalPoints} pts</p>
           <p className="muted">Your balance: {user?.points || 0} pts</p>
-          <Button label="Checkout and redeem" icon="pi pi-check" onClick={checkout} disabled={!cart.items.length || notEnoughPoints} loading={loading} />
+
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem', margin: '1rem 0' }}>
+            <Checkbox
+              inputId="terms-accept"
+              checked={termsAccepted}
+              onChange={(e) => setTermsAccepted(e.checked)}
+            />
+            <label htmlFor="terms-accept" style={{ cursor: 'pointer', fontSize: '0.9rem', lineHeight: '1.4' }}>
+              I agree to the{' '}
+              <button
+                type="button"
+                onClick={() => setTermsVisible(true)}
+                style={{ background: 'none', border: 'none', padding: 0, color: 'var(--primary-color, #6366f1)', cursor: 'pointer', textDecoration: 'underline', fontSize: 'inherit' }}
+              >
+                Terms and Conditions
+              </button>
+            </label>
+          </div>
+
+          <Button
+            label="Checkout and redeem"
+            icon="pi pi-check"
+            onClick={checkout}
+            disabled={!cart.items.length || notEnoughPoints || !termsAccepted}
+            loading={loading}
+          />
           {notEnoughPoints && (
             <Message severity="warn" text="Not enough points for this cart. Reduce quantity or remove an item." />
           )}
@@ -82,6 +111,30 @@ export default function CartPage() {
           )}
         </aside>
       </div>
+
+      <Dialog
+        header="Terms and Conditions"
+        visible={termsVisible}
+        onHide={() => setTermsVisible(false)}
+        modal
+        style={{ maxWidth: '560px', width: '90vw' }}
+      >
+        <h3>Standard Carter Bank Voucher Terms</h3>
+        <p>Vouchers are issued after successful points redemption and are subject to partner availability.</p>
+        <p>Each coupon code is unique. Codes cannot be reused, exchanged for cash, or transferred after redemption.</p>
+        <p>Expired vouchers and vouchers that have reached their redemption limit cannot be redeemed.</p>
+        <p>Carter Bank may verify vouchers using the QR code and coupon code shown in the downloaded PDF.</p>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
+          <Button
+            label="I Agree"
+            icon="pi pi-check"
+            onClick={() => {
+              setTermsAccepted(true);
+              setTermsVisible(false);
+            }}
+          />
+        </div>
+      </Dialog>
     </>
   );
 }
