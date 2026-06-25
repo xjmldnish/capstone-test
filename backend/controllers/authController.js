@@ -84,4 +84,31 @@ async function updateProfile(req, res, next) {
   }
 }
 
-module.exports = { signup, login, googleStart, googleCallback, me, updateProfile };
+async function listUsers(req, res, next) {
+  try {
+    const users = await User.find({}).select('-password').sort('-createdAt');
+    res.json(users);
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function updateUserPoints(req, res, next) {
+  try {
+    const { points } = req.body;
+    if (typeof points !== 'number' || points < 0) {
+      return res.status(400).json({ message: 'Points must be a non-negative number.' });
+    }
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { points },
+      { new: true, runValidators: true }
+    ).select('-password');
+    if (!user) return res.status(404).json({ message: 'User not found.' });
+    res.json(user);
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = { signup, login, googleStart, googleCallback, me, updateProfile, listUsers, updateUserPoints };
