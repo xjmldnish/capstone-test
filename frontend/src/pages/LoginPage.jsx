@@ -9,6 +9,10 @@ import { API_BASE } from '../api/client';
 import { authApi } from '../api/resources';
 import { useAuth } from '../state/AuthContext.jsx';
 
+//IMPORT FUNGSI FIREBASE
+import { loginDenganGoogle } from '../firebase';
+
+
 export default function LoginPage() {
   const { user, login, signup } = useAuth();
   const [mode, setMode] = useState('login');
@@ -20,7 +24,7 @@ export default function LoginPage() {
   useEffect(() => {
     authApi.config()
       .then((data) => setGoogleEnabled(data.googleOAuthEnabled))
-      .catch(() => setGoogleEnabled(false));
+      .catch(() => setGoogleEnabled(true)); // utk allow firebase testing
   }, []);
 
   if (user) return <Navigate to="/" replace />;
@@ -41,6 +45,26 @@ export default function LoginPage() {
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Authentication failed.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  //FUNGSI HANDLER UNTUK BUTANG GOOGLE FIREBASE
+  async function handleFirebaseGoogleLogin(event) {
+    event.preventDefault(); // Elak form daripada auto-submit
+    setError('');
+    setBusy(true);
+    try {
+      const firebaseUser = await loginDenganGoogle();
+      console.log("Berjaya dapat Firebase User:", firebaseUser);
+      
+      // NOTA: Lepas dapat data firebaseUser (seperti token/email), korang biasanya kena hantar token ni 
+      // ke backend korang atau panggil fungsi login dari AuthContext (cth: `await loginWithFirebase(firebaseUser)`)
+      // supaya global state `user` dalam web app korang dikemas kini.
+      
+    } catch (err) {
+      setError(err.message || 'Firebase Google authentication failed.');
     } finally {
       setBusy(false);
     }
@@ -76,14 +100,24 @@ export default function LoginPage() {
             Password
             <Password value={form.password} onChange={(e) => update('password', e.target.value)} feedback={mode === 'signup'} toggleMask required />
           </label>
+          
           <Button type="submit" label={mode === 'login' ? 'Login' : 'Create account'} icon="pi pi-lock" loading={busy} />
+          
+          {/* TUKAR BUTANG DARIPADA LINK BACKEND KEPADA FUNGSI FIREBASE */}
           {googleEnabled ? (
-            <a className="google-button" href={`${API_BASE}/auth/google`}>
-              <i className="pi pi-google" /> Continue with Google
-            </a>
+            <Button 
+              type="button" 
+              className="google-button p-button-outlined" 
+              onClick={handleFirebaseGoogleLogin}
+              loading={busy}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', background: '#fff', color: '#444', border: '1px solid #ccc' }}
+            >
+              <i className="pi pi-google" style={{ color: '#4285F4' }} /> Continue with Google (Firebase)
+            </Button>
           ) : (
             <Message severity="info" text="Google login is ready in code. Add Google credentials in backend .env to enable it." />
           )}
+          
           <p className="demo-note">Demo accounts after seeding: user@carter.test / admin@carter.test, password: password123</p>
         </form>
       </Card>
