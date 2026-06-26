@@ -5,13 +5,8 @@ import { Card } from 'primereact/card';
 import { InputText } from 'primereact/inputtext';
 import { Password } from 'primereact/password';
 import { Message } from 'primereact/message';
-import { API_BASE } from '../api/client';
 import { authApi } from '../api/resources';
 import { useAuth } from '../state/AuthContext.jsx';
-
-//IMPORT FUNGSI FIREBASE
-import { loginDenganGoogle } from '../firebase';
-
 
 export default function LoginPage() {
   const { user, login, signup } = useAuth();
@@ -24,7 +19,15 @@ export default function LoginPage() {
   useEffect(() => {
     authApi.config()
       .then((data) => setGoogleEnabled(data.googleOAuthEnabled))
-      .catch(() => setGoogleEnabled(true)); // utk allow firebase testing
+      .catch(() => setGoogleEnabled(true)); // Untuk allow testing/fallback
+  }, []);
+
+  // Tangkap error daripada URL jika Passport Google Callback gagal
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('error') === 'google') {
+      setError('Pautan Google melalui Passport.js gagal. Sila cuba lagi.');
+    }
   }, []);
 
   if (user) return <Navigate to="/" replace />;
@@ -33,6 +36,7 @@ export default function LoginPage() {
     setForm((current) => ({ ...current, [key]: value }));
   }
 
+  // PINTU 1: LOGIN/SIGNUP BIASA (EMEL + PASSWORD)
   async function submit(event) {
     event.preventDefault();
     setError('');
@@ -50,24 +54,15 @@ export default function LoginPage() {
     }
   }
 
-  //FUNGSI HANDLER UNTUK BUTANG GOOGLE FIREBASE
-  async function handleFirebaseGoogleLogin(event) {
-    event.preventDefault(); // Elak form daripada auto-submit
+  // PINTU 2: LOGIK BARU GOOGLE LOGIN (HALA KE PASSPORT.JS BACKEND)
+  function handlePassportGoogleLogin(event) {
+    event.preventDefault();
     setError('');
     setBusy(true);
-    try {
-      const firebaseUser = await loginDenganGoogle();
-      console.log("Berjaya dapat Firebase User:", firebaseUser);
-      
-      // NOTA: Lepas dapat data firebaseUser (seperti token/email), korang biasanya kena hantar token ni 
-      // ke backend korang atau panggil fungsi login dari AuthContext (cth: `await loginWithFirebase(firebaseUser)`)
-      // supaya global state `user` dalam web app korang dikemas kini.
-      
-    } catch (err) {
-      setError(err.message || 'Firebase Google authentication failed.');
-    } finally {
-      setBusy(false);
-    }
+    
+    // Aliran Komersial: Tolak browser terus ke endpoint googleStart di backend
+    // Sila pastikan port (contoh: 5000) sepadan dengan port server Node.js korang
+    window.location.href = 'http://localhost:5000/api/auth/google';
   }
 
   return (
@@ -80,10 +75,11 @@ export default function LoginPage() {
 
       <Card className="login-card">
         <div className="segmented">
-          <button className={mode === 'login' ? 'active' : ''} onClick={() => setMode('login')}>Login</button>
-          <button className={mode === 'signup' ? 'active' : ''} onClick={() => setMode('signup')}>Sign up</button>
+          <button type="button" className={mode === 'login' ? 'active' : ''} onClick={() => setMode('login')}>Login</button>
+          <button type="button" className={mode === 'signup' ? 'active' : ''} onClick={() => setMode('signup')}>Sign up</button>
         </div>
 
+        {/* Form untuk Pintu 1 */}
         <form onSubmit={submit} className="form-stack">
           {error && <Message severity="error" text={error} />}
           <label>
@@ -103,16 +99,19 @@ export default function LoginPage() {
           
           <Button type="submit" label={mode === 'login' ? 'Login' : 'Create account'} icon="pi pi-lock" loading={busy} />
           
-          {/* TUKAR BUTANG DARIPADA LINK BACKEND KEPADA FUNGSI FIREBASE */}
+          {/* Pembahagi visual */}
+          <hr style={{ border: '0', borderTop: '1px solid #eee', margin: '20px 0' }} />
+
+          {/* Butang Google (Pintu 2) - Styling Asal Mengekalkan Nama Firebase Untuk Visual */}
           {googleEnabled ? (
             <Button 
               type="button" 
               className="google-button p-button-outlined" 
-              onClick={handleFirebaseGoogleLogin}
+              onClick={handlePassportGoogleLogin} // <-- Memanggil fungsi Passport
               loading={busy}
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', background: '#fff', color: '#444', border: '1px solid #ccc' }}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', background: '#fff', color: '#444', border: '1px solid #ccc', width: '100%' }}
             >
-              <i className="pi pi-google" style={{ color: '#4285F4' }} /> Continue with Google (Firebase)
+              <i className="pi pi-google" style={{ color: '#4285F4' }} /> Continue with Google
             </Button>
           ) : (
             <Message severity="info" text="Google login is ready in code. Add Google credentials in backend .env to enable it." />

@@ -11,7 +11,8 @@ function configurePassport() {
   passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: process.env.GOOGLE_CALLBACK_URL || '/api/auth/google/callback'
+    callbackURL: process.env.GOOGLE_CALLBACK_URL || '/api/auth/google/callback',
+    proxy: true
   }, async (accessToken, refreshToken, profile, done) => {
     try {
       const email = profile.emails?.[0]?.value;
@@ -23,12 +24,12 @@ function configurePassport() {
         { email },
         {
           $setOnInsert: {
-            username: profile.displayName || email.split('@')[0],
+            username: (profile.displayName || email.split('@')[0]).replace(/\s+/g, '').toLowerCase() + Math.floor(Math.random() * 1000), 
             points: 1200,
             role: 'user',
             is_active: true
           },
-          googleId: profile.id
+          $set: { googleId: profile.id } // Gunakan $set secara eksplisit untuk link-kan akaun
         },
         { new: true, upsert: true, runValidators: true }
       );
